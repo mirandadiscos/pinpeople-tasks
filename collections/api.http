@@ -1,0 +1,42 @@
+@baseUrl = http://127.0.0.1:3000
+@apiToken = change-me
+
+### 1) List survey responses (default pagination: page=1, per_page=25)
+GET {{baseUrl}}/v1/survey_responses
+Authorization: Bearer {{apiToken}}
+Content-Type: application/json
+
+### 2) List survey responses with explicit pagination
+GET {{baseUrl}}/v1/survey_responses?page=0&per_page=100
+Authorization: Bearer {{apiToken}}
+Content-Type: application/json
+
+### 3) List survey responses page 2
+GET {{baseUrl}}/v1/survey_responses?page=2&per_page=25
+Authorization: Bearer {{apiToken}}
+Content-Type: application/json
+
+### 4) Filter by exact date
+GET {{baseUrl}}/v1/survey_responses?date=2022-01-20
+Authorization: Bearer {{apiToken}}
+Content-Type: application/json
+
+### 5) Filter by inclusive range (from + to)
+GET {{baseUrl}}/v1/survey_responses?from=2022-01-20&to=2022-01-22
+Authorization: Bearer {{apiToken}}
+Content-Type: application/json
+
+### 6) Filter with only from
+GET {{baseUrl}}/v1/survey_responses?from=2022-01-20
+Authorization: Bearer {{apiToken}}
+Content-Type: application/json
+
+### 7) Filter with only to
+GET {{baseUrl}}/v1/survey_responses?to=2022-01-21
+Authorization: Bearer {{apiToken}}
+Content-Type: application/json
+
+### 8) Invalid: date mixed with from/to (expected 422)
+GET {{baseUrl}}/v1/survey_responses?date=2022-01-20&from=2022-01-01&to=2022-01-31
+Authorization: Bearer {{apiToken}}
+Content-Type: application/json

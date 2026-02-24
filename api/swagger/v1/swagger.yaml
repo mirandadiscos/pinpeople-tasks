@@ -173,8 +173,46 @@ paths:
                 required:
                 - data
                 - meta
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+                    required:
+                    - code
+                    - message
+                required:
+                - error
         '422':
-          description: invalid when mixing date and range
+          description: invalid filters (mixed date/range or invalid date format)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+                    required:
+                    - code
+                    - message
+                required:
+                - error
+        '500':
+          description: internal server error
           content:
             application/json:
               schema:

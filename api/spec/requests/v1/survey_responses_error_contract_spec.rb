@@ -25,7 +25,7 @@ RSpec.describe 'V1::SurveyResponses error contract', type: :request do
 
     it_behaves_like 'error object response',
       status: :unprocessable_content,
-      code: 'unprocessable_entity',
+      code: 'unprocessable_content',
       message: 'Use date or from/to, not both'
   end
 end

@@ -1,6 +1,21 @@
 require 'swagger_helper'
 
 RSpec.describe 'v1/survey_responses', type: :request do
+  ERROR_OBJECT_SCHEMA = {
+    type: :object,
+    properties: {
+      error: {
+        type: :object,
+        properties: {
+          code: { type: :string },
+          message: { type: :string }
+        },
+        required: %w[code message]
+      }
+    },
+    required: [ 'error' ]
+  }.freeze
+
   before do
     allow(ENV).to receive(:[]).and_call_original
     allow(ENV).to receive(:[]).with('API_AUTH_TOKEN').and_return('test-api-token')
@@ -172,29 +187,49 @@ RSpec.describe 'v1/survey_responses', type: :request do
         end
       end
 
-      response(422, 'invalid when mixing date and range') do
-        let(:date) { '2022-01-20' }
-        let(:from) { '2022-01-01' }
-        let(:to) { '2022-01-31' }
-
-        schema type: :object,
-          properties: {
-            error: {
-              type: :object,
-              properties: {
-                code: { type: :string },
-                message: { type: :string }
-              },
-              required: %w[code message]
-            }
-          },
-          required: ['error']
+      response(401, 'unauthorized') do
+        let(:Authorization) { nil }
+        schema ERROR_OBJECT_SCHEMA
 
         run_test! do |response|
           body = parsed_json(response)
 
           expect(body).to include(
-            error: { code: 'unprocessable_entity', message: 'Use date or from/to, not both' }
+            error: { code: 'unauthorized', message: 'Unauthorized' }
+          )
+        end
+      end
+
+      response(422, 'invalid filters (mixed date/range or invalid date format)') do
+        let(:date) { '2022-01-20' }
+        let(:from) { '2022-01-01' }
+        let(:to) { '2022-01-31' }
+
+        schema ERROR_OBJECT_SCHEMA
+
+        run_test! do |response|
+          body = parsed_json(response)
+
+          expect(body).to include(
+            error: { code: 'unprocessable_content', message: 'Use date or from/to, not both' }
+          )
+        end
+      end
+
+      response(500, 'internal server error') do
+        schema ERROR_OBJECT_SCHEMA
+
+        before do
+          service = instance_double(SurveyResponses::IndexService)
+          allow(SurveyResponses::IndexService).to receive(:new).and_return(service)
+          allow(service).to receive(:call).and_raise(StandardError, 'forced failure')
+        end
+
+        run_test! do |response|
+          body = parsed_json(response)
+
+          expect(body).to include(
+            error: { code: 'internal_error', message: 'Internal server error' }
           )
         end
       end

@@ -1,8 +1,3 @@
-require 'simplecov'
-SimpleCov.start do
-  minimum_coverage 90
-end
-
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'

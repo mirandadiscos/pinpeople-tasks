@@ -147,6 +147,30 @@ curl -H "Authorization: Bearer $API_AUTH_TOKEN" http://127.0.0.1:3000/v1/survey_
 - `page` (default: `1`)
 - `per_page` (default: `25`, maximo: `100`)
 
+## Decisao Arquitetural e Desacoplamento
+
+Para manter a API em padrao Rails com menor acoplamento, a stack de `v1/survey_responses` foi separada por responsabilidade:
+
+- `Controller` (`V1::SurveyResponsesController`): apenas orquestra request/response HTTP.
+- `Service` (`SurveyResponses::IndexService`): executa o caso de uso e monta `data` + `meta`.
+- `Params Object` (`SurveyResponses::IndexParams`): valida/normaliza filtros e paginacao.
+- `Query Object` (`SurveyResponses::IndexQuery`): concentra composicao de consulta no ActiveRecord.
+- `Serializer` (`SurveyResponseSerializer`): define contrato de saida JSON do recurso.
+- `Authenticator` (`ApiTokenAuthenticator`): isola regra de autenticacao Bearer token.
+
+Beneficios praticos dessa decisao:
+
+- reduz logica de negocio no controller;
+- melhora testabilidade unitária por camada;
+- facilita evoluir regras de filtro/serializacao sem quebrar endpoint;
+- evita duplicacao de regra HTTP e de dominio.
+
+### Observacao sobre status HTTP 422 no Rails 8/Rack 3
+
+- A API retorna `422` para erros de validacao/filtro, com `error.code = \"unprocessable_content\"` no payload.
+- No codigo Rails, usamos `:unprocessable_content` para evitar warning deprecado do Rack.
+- Isso preserva o mesmo comportamento HTTP externo (`422`) com semantica consistente entre payload e status interno.
+
 ## Swagger / API Docs
 
 ### Gerar OpenAPI

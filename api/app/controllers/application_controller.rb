@@ -10,11 +10,13 @@ class ApplicationController < ActionController::API
   end
 
   rescue_from ActiveRecord::RecordInvalid do
-    render_error(code: "unprocessable_entity", message: "Validation failed", status: :unprocessable_content)
+    render_error(code: "unprocessable_content", message: "Validation failed", status: :unprocessable_content)
   end
 
   rescue_from StandardError do |error|
-    Rails.logger.error("[api_error] #{error.class}: #{error.message}")
+    Rails.logger.error(
+      "[api_error] request_id=#{request.request_id} class=#{error.class} message=#{error.message}"
+    )
     render_error(code: "internal_error", message: "Internal server error", status: :internal_server_error)
   end
 
@@ -23,19 +25,9 @@ class ApplicationController < ActionController::API
   def authenticate_api_request!
     return if public_endpoint?
     return if request.options?
-
-    token, = ActionController::HttpAuthentication::Token.token_and_options(request)
-    return if valid_api_token?(token)
+    return if ApiTokenAuthenticator.new(request: request).valid?
 
     render_error(code: "unauthorized", message: "Unauthorized", status: :unauthorized)
-  end
-
-  def valid_api_token?(token)
-    expected_token = ENV["API_AUTH_TOKEN"].to_s
-    return false if token.blank? || expected_token.blank?
-    return false unless token.bytesize == expected_token.bytesize
-
-    ActiveSupport::SecurityUtils.secure_compare(token, expected_token)
   end
 
   def public_endpoint?

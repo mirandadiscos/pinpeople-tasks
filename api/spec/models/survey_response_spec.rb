@@ -113,17 +113,5 @@ RSpec.describe SurveyResponse do
 
       expect(filtered.pluck(:id)).to contain_exactly(response_2.id, response_3.id)
     end
-
-    it 'paginates based on page and per_page' do
-      paginated = described_class.ordered_by_response_date.page(2, 1)
-
-      expect(paginated.pluck(:id)).to contain_exactly(response_2.id)
-    end
-
-    it 'falls back to safe pagination defaults for invalid values' do
-      paginated = described_class.ordered_by_response_date.page(0, 0)
-
-      expect(paginated.pluck(:id)).to match_array([ response_1.id, response_2.id, response_3.id ])
-    end
   end
 end
