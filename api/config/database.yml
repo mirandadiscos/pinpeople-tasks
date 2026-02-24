@@ -1,0 +1,22 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: <%= ENV.fetch("API_DB_HOST", "127.0.0.1") %>
+  port: <%= ENV.fetch("API_DB_PORT", 5432) %>
+  username: <%= ENV.fetch("API_DB_USERNAME", "postgres") %>
+  password: <%= ENV.fetch("API_DB_PASSWORD", "") %>
+  max_connections: 5
+
+development:
+  <<: *default
+  database: <%= ENV.fetch("API_DB_NAME_DEVELOPMENT", "api_development") %>
+
+test:
+  <<: *default
+  database: <%= ENV.fetch("API_DB_NAME_TEST", "api_test") %>
+
+production:
+  <<: *default
+  database: <%= ENV.fetch("API_DB_NAME_PRODUCTION", "api_production") %>
+  username: <%= ENV.fetch("API_DB_USERNAME", "api") %>
+  password: <%= ENV.fetch("API_DB_PASSWORD", "") %>

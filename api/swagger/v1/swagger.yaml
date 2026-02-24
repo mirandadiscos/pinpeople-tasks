@@ -1,0 +1,196 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+security:
+- bearerAuth: []
+paths:
+  "/v1/survey_responses":
+    get:
+      summary: List survey responses
+      tags:
+      - Survey Responses
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+        required: true
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+        required: false
+      - name: per_page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+        required: false
+      - name: date
+        in: query
+        schema:
+          type: string
+          format: date
+        required: false
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date
+        required: false
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date
+        required: false
+      responses:
+        '200':
+          description: successful with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        email:
+                          type: string
+                          format: email
+                        corporate_email:
+                          type: string
+                          format: email
+                        department:
+                          type: string
+                        role:
+                          type: string
+                        job_function:
+                          type: string
+                        location:
+                          type: string
+                        company_tenure:
+                          type: string
+                        gender:
+                          type: string
+                        generation:
+                          type: string
+                        level_0_company:
+                          type: string
+                        level_1_board:
+                          type: string
+                        level_2_management:
+                          type: string
+                        level_3_coordination:
+                          type: string
+                        level_4_area:
+                          type: string
+                        response_date:
+                          type: string
+                          format: date
+                        interest_in_role:
+                          type: integer
+                        interest_in_role_comment:
+                          type: string
+                          nullable: true
+                        contribution:
+                          type: integer
+                        contribution_comment:
+                          type: string
+                          nullable: true
+                        learning_and_development:
+                          type: integer
+                        learning_and_development_comment:
+                          type: string
+                          nullable: true
+                        feedback:
+                          type: integer
+                        feedback_comment:
+                          type: string
+                          nullable: true
+                        manager_interaction:
+                          type: integer
+                        manager_interaction_comment:
+                          type: string
+                          nullable: true
+                        career_clarity:
+                          type: integer
+                        career_clarity_comment:
+                          type: string
+                          nullable: true
+                        permanence_expectation:
+                          type: integer
+                        permanence_expectation_comment:
+                          type: string
+                          nullable: true
+                        enps:
+                          type: integer
+                        enps_comment:
+                          type: string
+                          nullable: true
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total_count:
+                        type: integer
+                      total_pages:
+                        type: integer
+                      filters:
+                        type: object
+                        properties:
+                          date:
+                            type: string
+                            format: date
+                            nullable: true
+                          from:
+                            type: string
+                            format: date
+                            nullable: true
+                          to:
+                            type: string
+                            format: date
+                            nullable: true
+                required:
+                - data
+                - meta
+        '422':
+          description: invalid when mixing date and range
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+                    required:
+                    - code
+                    - message
+                required:
+                - error
+servers:
+- url: http://127.0.0.1:3000
