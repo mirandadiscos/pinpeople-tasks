@@ -6,6 +6,12 @@ swagger_minimum_coverage = Integer(ENV.fetch('SWAGGER_COVERAGE_MIN', '70'))
 minimum_coverage_threshold = swaggerize_run ? swagger_minimum_coverage : normal_minimum_coverage
 
 SimpleCov.start do
+  if swaggerize_run
+    add_filter '/spec/'
+    add_filter '/config/'
+    add_filter '/db/'
+  end
+
   minimum_coverage minimum_coverage_threshold
 end
 

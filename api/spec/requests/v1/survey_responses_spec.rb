@@ -1,21 +1,6 @@
 require 'swagger_helper'
 
 RSpec.describe 'v1/survey_responses', type: :request do
-  ERROR_OBJECT_SCHEMA = {
-    type: :object,
-    properties: {
-      error: {
-        type: :object,
-        properties: {
-          code: { type: :string },
-          message: { type: :string }
-        },
-        required: %w[code message]
-      }
-    },
-    required: [ 'error' ]
-  }.freeze
-
   before do
     allow(ENV).to receive(:[]).and_call_original
     allow(ENV).to receive(:[]).with('API_AUTH_TOKEN').and_return('test-api-token')
@@ -189,7 +174,7 @@ RSpec.describe 'v1/survey_responses', type: :request do
 
       response(401, 'unauthorized') do
         let(:Authorization) { nil }
-        schema ERROR_OBJECT_SCHEMA
+        schema '$ref' => '#/components/schemas/ErrorObject'
 
         run_test! do |response|
           body = parsed_json(response)
@@ -205,7 +190,7 @@ RSpec.describe 'v1/survey_responses', type: :request do
         let(:from) { '2022-01-01' }
         let(:to) { '2022-01-31' }
 
-        schema ERROR_OBJECT_SCHEMA
+        schema '$ref' => '#/components/schemas/ErrorObject'
 
         run_test! do |response|
           body = parsed_json(response)
@@ -216,8 +201,21 @@ RSpec.describe 'v1/survey_responses', type: :request do
         end
       end
 
+      response(422, 'invalid date format') do
+        let(:date) { '20-01-2022' }
+        schema '$ref' => '#/components/schemas/ErrorObject'
+
+        run_test! do |response|
+          body = parsed_json(response)
+
+          expect(body).to include(
+            error: { code: 'unprocessable_content', message: 'date must be in YYYY-MM-DD format' }
+          )
+        end
+      end
+
       response(500, 'internal server error') do
-        schema ERROR_OBJECT_SCHEMA
+        schema '$ref' => '#/components/schemas/ErrorObject'
 
         before do
           service = instance_double(SurveyResponses::Index::Service)

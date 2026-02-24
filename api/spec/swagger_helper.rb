@@ -28,6 +28,54 @@ RSpec.configure do |config|
             scheme: :bearer,
             bearerFormat: :Token
           }
+        },
+        schemas: {
+          ErrorObject: {
+            type: :object,
+            properties: {
+              error: {
+                type: :object,
+                properties: {
+                  code: { type: :string },
+                  message: { type: :string }
+                },
+                required: %w[code message]
+              }
+            },
+            required: [ 'error' ]
+          }
+        },
+        responses: {
+          UnauthorizedError: {
+            description: 'Unauthorized',
+            content: {
+              'application/json' => {
+                schema: {
+                  '$ref' => '#/components/schemas/ErrorObject'
+                }
+              }
+            }
+          },
+          UnprocessableContentError: {
+            description: 'Unprocessable content',
+            content: {
+              'application/json' => {
+                schema: {
+                  '$ref' => '#/components/schemas/ErrorObject'
+                }
+              }
+            }
+          },
+          InternalServerError: {
+            description: 'Internal server error',
+            content: {
+              'application/json' => {
+                schema: {
+                  '$ref' => '#/components/schemas/ErrorObject'
+                }
+              }
+            }
+          }
         }
       },
       security: [ { bearerAuth: [] } ],
