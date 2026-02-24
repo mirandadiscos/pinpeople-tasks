@@ -5,8 +5,14 @@ module V1
     end
 
     def index
-      payload = SurveyResponses::IndexService.new(params: params).call
+      payload = SurveyResponses::Index::Service.new(params: index_params).call
       render_payload(payload)
+    end
+
+    private
+
+    def index_params
+      params.permit(:page, :per_page, :date, :from, :to)
     end
   end
 end

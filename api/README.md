@@ -152,9 +152,9 @@ curl -H "Authorization: Bearer $API_AUTH_TOKEN" http://127.0.0.1:3000/v1/survey_
 Para manter a API em padrao Rails com menor acoplamento, a stack de `v1/survey_responses` foi separada por responsabilidade:
 
 - `Controller` (`V1::SurveyResponsesController`): apenas orquestra request/response HTTP.
-- `Service` (`SurveyResponses::IndexService`): executa o caso de uso e monta `data` + `meta`.
-- `Params Object` (`SurveyResponses::IndexParams`): valida/normaliza filtros e paginacao.
-- `Query Object` (`SurveyResponses::IndexQuery`): concentra composicao de consulta no ActiveRecord.
+- `Service` (`SurveyResponses::Index::Service`): executa o caso de uso e monta `data` + `meta`.
+- `Contract` (`SurveyResponses::Index::Contract`): valida filtros de `index` com `dry-validation`.
+- `Query Object` (`SurveyResponses::Index::Query`): concentra composicao de consulta no ActiveRecord.
 - `Serializer` (`SurveyResponseSerializer`): define contrato de saida JSON do recurso.
 - `Authenticator` (`ApiTokenAuthenticator`): isola regra de autenticacao Bearer token.
 

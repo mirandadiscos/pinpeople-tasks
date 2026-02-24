@@ -220,8 +220,8 @@ RSpec.describe 'v1/survey_responses', type: :request do
         schema ERROR_OBJECT_SCHEMA
 
         before do
-          service = instance_double(SurveyResponses::IndexService)
-          allow(SurveyResponses::IndexService).to receive(:new).and_return(service)
+          service = instance_double(SurveyResponses::Index::Service)
+          allow(SurveyResponses::Index::Service).to receive(:new).and_return(service)
           allow(service).to receive(:call).and_raise(StandardError, 'forced failure')
         end
 
