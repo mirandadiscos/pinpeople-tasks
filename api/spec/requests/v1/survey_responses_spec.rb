@@ -172,9 +172,8 @@ RSpec.describe 'v1/survey_responses', type: :request do
         end
       end
 
-      response(401, 'unauthorized') do
+      response(401, 'unauthorized', '$ref' => '#/components/responses/UnauthorizedError') do
         let(:Authorization) { nil }
-        schema '$ref' => '#/components/schemas/ErrorObject'
 
         run_test! do |response|
           body = parsed_json(response)
@@ -185,12 +184,10 @@ RSpec.describe 'v1/survey_responses', type: :request do
         end
       end
 
-      response(422, 'invalid filters (mixed date/range or invalid date format)') do
+      response(422, 'invalid filters (mixed date/range or invalid date format)', '$ref' => '#/components/responses/UnprocessableContentError') do
         let(:date) { '2022-01-20' }
         let(:from) { '2022-01-01' }
         let(:to) { '2022-01-31' }
-
-        schema '$ref' => '#/components/schemas/ErrorObject'
 
         run_test! do |response|
           body = parsed_json(response)
@@ -201,9 +198,8 @@ RSpec.describe 'v1/survey_responses', type: :request do
         end
       end
 
-      response(422, 'invalid date format') do
+      response(422, 'invalid date format', '$ref' => '#/components/responses/UnprocessableContentError') do
         let(:date) { '20-01-2022' }
-        schema '$ref' => '#/components/schemas/ErrorObject'
 
         run_test! do |response|
           body = parsed_json(response)
@@ -214,13 +210,11 @@ RSpec.describe 'v1/survey_responses', type: :request do
         end
       end
 
-      response(500, 'internal server error') do
-        schema '$ref' => '#/components/schemas/ErrorObject'
-
+      response(500, 'internal server error', '$ref' => '#/components/responses/InternalServerError') do
         before do
-          service = instance_double(SurveyResponses::Index::Service)
-          allow(SurveyResponses::Index::Service).to receive(:new).and_return(service)
-          allow(service).to receive(:call).and_raise(StandardError, 'forced failure')
+          use_case = instance_double(SurveyResponses::Index::UseCase)
+          allow(SurveyResponses::Index::UseCase).to receive(:new).and_return(use_case)
+          allow(use_case).to receive(:call).and_raise(StandardError, 'forced failure')
         end
 
         run_test! do |response|

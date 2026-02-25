@@ -1,7 +1,7 @@
 module V1
   class SurveyResponsesController < BaseController
     def index
-      payload = SurveyResponses::Index::Service.new(params: index_params).call
+      payload = SurveyResponses::Index::UseCase.new(params: index_params).call
       render_payload(payload)
     end
 

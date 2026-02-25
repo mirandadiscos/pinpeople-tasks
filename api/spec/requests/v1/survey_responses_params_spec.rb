@@ -9,10 +9,10 @@ RSpec.describe 'V1::SurveyResponses params', type: :request do
     allow(ENV).to receive(:[]).with('API_AUTH_TOKEN').and_return(token)
   end
 
-  it 'passes only permitted params to the index service' do
-    service = instance_double(SurveyResponses::Index::Service, call: { data: [], meta: {} })
+  it 'passes only permitted params to the index use case' do
+    use_case = instance_double(SurveyResponses::Index::UseCase, call: { data: [], meta: {} })
 
-    expect(SurveyResponses::Index::Service).to receive(:new) do |params:|
+    expect(SurveyResponses::Index::UseCase).to receive(:new) do |params:|
       expect(params).to be_permitted
       expect(params.to_h.keys).to match_array(%w[page per_page date from to])
       expect(params.to_h).to eq(
@@ -24,7 +24,7 @@ RSpec.describe 'V1::SurveyResponses params', type: :request do
       )
       expect(params.to_h).not_to have_key('admin')
 
-      service
+      use_case
     end
 
     get '/v1/survey_responses',

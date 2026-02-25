@@ -1,24 +1,10 @@
 module SurveyResponses
   module Index
-    class Query
-      class << self
-        def call(date:, from:, to:)
-          relation = SurveyResponse.ordered_by_response_date
+    class UseCase
+      DEFAULT_PAGE = 1
+      DEFAULT_PER_PAGE = 25
+      MAX_PER_PAGE = 100
 
-          if date.present?
-            relation.by_response_date(date)
-          elsif from.present? || to.present?
-            from_date = from.presence || SurveyResponse::MIN_FILTER_DATE
-            to_date = to.presence || SurveyResponse::MAX_FILTER_DATE
-            relation.between_response_dates(from_date, to_date)
-          else
-            relation
-          end
-        end
-      end
-    end
-
-    class Service
       def initialize(params:)
         @params = params
       end
@@ -30,7 +16,7 @@ module SurveyResponses
         raise InvalidFiltersError, first_error_message(result) if result.failure?
 
         validated_input = contract.coerce_dates(result.to_h)
-        relation = Query.call(
+        query = Query.call(
           date: validated_input[:date],
           from: validated_input[:from],
           to: validated_input[:to]
@@ -38,10 +24,10 @@ module SurveyResponses
 
         page = normalized_page(validated_input[:page])
         per_page = normalized_per_page(validated_input[:per_page])
-        total_count = relation.count
+        total_count = query.count
 
         {
-          data: paginated(relation, page: page, per_page: per_page).map do |record|
+          data: paginated(query, page: page, per_page: per_page).map do |record|
             SurveyResponseSerializer.new(record).as_json
           end,
           meta: {
@@ -78,17 +64,17 @@ module SurveyResponses
 
       def normalized_page(value)
         page = value.to_i
-        page.positive? ? page : SurveyResponse::DEFAULT_PAGE
+        page.positive? ? page : DEFAULT_PAGE
       end
 
       def normalized_per_page(value)
         per_page = value.to_i
-        per_page = SurveyResponse::DEFAULT_PER_PAGE unless per_page.positive?
-        [ per_page, SurveyResponse::MAX_PER_PAGE ].min
+        per_page = DEFAULT_PER_PAGE unless per_page.positive?
+        [ per_page, MAX_PER_PAGE ].min
       end
 
-      def paginated(relation, page:, per_page:)
-        relation.offset((page - 1) * per_page).limit(per_page)
+      def paginated(query, page:, per_page:)
+        query.offset((page - 1) * per_page).limit(per_page)
       end
     end
   end

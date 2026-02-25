@@ -1,7 +1,4 @@
 class SurveyResponse < ApplicationRecord
-  DEFAULT_PAGE = 1
-  DEFAULT_PER_PAGE = 25
-  MAX_PER_PAGE = 100
   MIN_FILTER_DATE = Date.new(1900, 1, 1)
   MAX_FILTER_DATE = Date.new(9999, 12, 31)
   LIKERT_RANGE = 1..7
