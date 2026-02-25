@@ -32,32 +32,32 @@ RSpec.describe SurveyResponses::Index::Query do
   end
 
   it 'filters by exact date' do
-    relation = described_class.call(date: Date.new(2022, 1, 21), from: nil, to: nil)
+    query = described_class.call(date: Date.new(2022, 1, 21), from: nil, to: nil)
 
-    expect(relation.pluck(:id)).to eq([ response_2.id ])
+    expect(query.pluck(:id)).to eq([ response_2.id ])
   end
 
   it 'filters by range when from/to are provided' do
-    relation = described_class.call(date: nil, from: Date.new(2022, 1, 21), to: Date.new(2022, 1, 22))
+    query = described_class.call(date: nil, from: Date.new(2022, 1, 21), to: Date.new(2022, 1, 22))
 
-    expect(relation.pluck(:id)).to eq([ response_2.id, response_3.id ])
+    expect(query.pluck(:id)).to eq([ response_2.id, response_3.id ])
   end
 
   it 'filters by open-ended range when only from is provided' do
-    relation = described_class.call(date: nil, from: Date.new(2022, 1, 21), to: nil)
+    query = described_class.call(date: nil, from: Date.new(2022, 1, 21), to: nil)
 
-    expect(relation.pluck(:id)).to eq([ response_2.id, response_3.id ])
+    expect(query.pluck(:id)).to eq([ response_2.id, response_3.id ])
   end
 
   it 'filters by open-ended range when only to is provided' do
-    relation = described_class.call(date: nil, from: nil, to: Date.new(2022, 1, 21))
+    query = described_class.call(date: nil, from: nil, to: Date.new(2022, 1, 21))
 
-    expect(relation.pluck(:id)).to eq([ response_1.id, response_2.id ])
+    expect(query.pluck(:id)).to eq([ response_1.id, response_2.id ])
   end
 
   it 'returns all ordered when no filters are provided' do
-    relation = described_class.call(date: nil, from: nil, to: nil)
+    query = described_class.call(date: nil, from: nil, to: nil)
 
-    expect(relation.pluck(:id)).to eq([ response_1.id, response_2.id, response_3.id ])
+    expect(query.pluck(:id)).to eq([ response_1.id, response_2.id, response_3.id ])
   end
 end
