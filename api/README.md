@@ -103,6 +103,8 @@ API local: `http://127.0.0.1:3000`.
 bundle exec rspec
 ```
 
+Observacao: a pasta `coverage/` e gerada automaticamente ao rodar `bundle exec rspec` (SimpleCov) e nao e versionada no Git.
+
 Policy de cobertura:
 
 - `bundle exec rspec` usa `COVERAGE_MIN` (default: `90`).
