@@ -225,7 +225,8 @@ bin/dev
 - UI: `http://127.0.0.1:3000/api-docs`
 - YAML: `http://127.0.0.1:3000/api-docs/v1/swagger.yaml`
 
-### Task 1 - Importar CSV
+### Resumo TechPlayground - PINPEOPLE
+## Task 1 - Importar CSV
 
 Comando:
 
@@ -233,7 +234,7 @@ Comando:
 bundle exec rake importer_csv:survey_response
 ```
 
-### Task 3 - Suite de Testes
+## Task 3 - Suite de Testes
 
 Rodar testes:
 
@@ -255,7 +256,7 @@ bundle exec rake rswag:specs:swaggerize
 
 - arquivo `swagger/v1/swagger.yaml` e gerado/atualizado
 
-### Task 9 - Rodar e testar API
+## Task 9 - Rodar e testar API
 
 Subir API:
 
