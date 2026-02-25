@@ -102,4 +102,81 @@ RSpec.describe SurveyResponses::CsvImporter do
       include(line: 2, field: :enps, value: 0, message: 'enps score is 0 (strong detractor)')
     )
   end
+
+  it 'normalizes blank and whitespace comments to nil' do
+    row_with_blank_comments_attrs = csv_pt_br_row_1.dup
+    row_with_blank_comments_attrs['Comentários - Interesse no Cargo'] = ''
+    row_with_blank_comments_attrs['Comentários - Contribuição'] = '   '
+    row_with_blank_comments_attrs['[Aberta] eNPS'] = ''
+    row_with_blank_comments = instance_double(CSV::Row, to_h: row_with_blank_comments_attrs)
+
+    allow(CSV).to receive(:foreach)
+      .with(file_path, headers: true, col_sep: ';')
+      .and_return([row_with_blank_comments].each)
+
+    described_class.call(file_path: file_path)
+
+    expect(SurveyResponse).to have_received(:create!).with(
+      hash_including(
+        interest_in_role_comment: nil,
+        contribution_comment: nil,
+        enps_comment: nil
+      )
+    )
+  end
+
+  it 'normalizes dash comments with surrounding spaces to nil' do
+    row_with_spaced_dash_attrs = csv_pt_br_row_1.dup
+    row_with_spaced_dash_attrs['Comentários - Feedback'] = ' - '
+    row_with_spaced_dash = instance_double(CSV::Row, to_h: row_with_spaced_dash_attrs)
+
+    allow(CSV).to receive(:foreach)
+      .with(file_path, headers: true, col_sep: ';')
+      .and_return([row_with_spaced_dash].each)
+
+    described_class.call(file_path: file_path)
+
+    expect(SurveyResponse).to have_received(:create!).with(hash_including(feedback_comment: nil))
+  end
+
+  it 'fails row when enps is blank and does not add zero warning' do
+    row_with_blank_enps_attrs = csv_pt_br_row_1.dup
+    row_with_blank_enps_attrs['eNPS'] = ''
+
+    invalid_record = SurveyResponse.new
+    invalid_record.errors.add(:enps, :blank)
+    allow(SurveyResponse).to receive(:create!)
+      .with(hash_including(enps: nil))
+      .and_raise(ActiveRecord::RecordInvalid.new(invalid_record))
+
+    row_with_blank_enps = instance_double(CSV::Row, to_h: row_with_blank_enps_attrs)
+
+    allow(CSV).to receive(:foreach)
+      .with(file_path, headers: true, col_sep: ';')
+      .and_return([row_with_blank_enps].each)
+
+    result = described_class.call(file_path: file_path)
+
+    expect(result).to include(processed: 1, created: 0, failed: 1, file: file_path)
+    expect(result[:warnings]).not_to include(include(field: :enps, value: 0))
+    expect(result[:errors]).to include(include(line: 2, error: /Enps|enps|blank/i))
+  end
+
+  it 'fails row when enps is non-integer and returns explicit parse error' do
+    row_with_invalid_enps_attrs = csv_pt_br_row_1.dup
+    row_with_invalid_enps_attrs['eNPS'] = 'abc'
+    row_with_invalid_enps = instance_double(CSV::Row, to_h: row_with_invalid_enps_attrs)
+
+    allow(CSV).to receive(:foreach)
+      .with(file_path, headers: true, col_sep: ';')
+      .and_return([row_with_invalid_enps].each)
+
+    result = described_class.call(file_path: file_path)
+
+    expect(result).to include(processed: 1, created: 0, failed: 1, file: file_path)
+    expect(result[:warnings]).not_to include(include(field: :enps, value: 0))
+    expect(result[:errors]).to include(
+      include(line: 2, error: 'enps invalid (expected integer 0..10)')
+    )
+  end
 end

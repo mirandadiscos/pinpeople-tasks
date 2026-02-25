@@ -100,7 +100,7 @@ module SurveyResponses
         career_clarity_comment: normalize_comment(attrs['Comentários - Clareza sobre Possibilidades de Carreira']),
         permanence_expectation: to_int(attrs['Expectativa de Permanência']),
         permanence_expectation_comment: normalize_comment(attrs['Comentários - Expectativa de Permanência']),
-        enps: to_int(attrs['eNPS']),
+        enps: parse_enps(attrs['eNPS']),
         enps_comment: normalize_comment(attrs['[Aberta] eNPS'])
       }
     end
@@ -120,8 +120,23 @@ module SurveyResponses
       value.to_i
     end
 
+    def parse_enps(value)
+      parsed = value.to_s.strip
+      return nil if parsed.empty?
+
+      Integer(parsed, 10)
+    rescue ArgumentError
+      raise ArgumentError, 'enps invalid (expected integer 0..10)'
+    end
+
     def normalize_comment(value)
-      value == '-' ? nil : value
+      normalized = value.to_s
+      stripped = normalized.strip
+
+      return nil if stripped.empty?
+      return nil if stripped == '-'
+
+      value
     end
 
     def append_likert_warnings(result:, attrs:, line:)
@@ -144,7 +159,7 @@ module SurveyResponses
     end
 
     def append_enps_zero_warning(result:, attrs:, line:)
-      return unless attrs[:enps].to_i.zero?
+      return unless attrs[:enps] == 0
 
       warning = {
         line: line,
