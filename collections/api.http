@@ -7,7 +7,7 @@ Authorization: Bearer {{apiToken}}
 Content-Type: application/json
 
 ### 2) List survey responses with explicit pagination
-GET {{baseUrl}}/v1/survey_responses?page=0&per_page=100
+GET {{baseUrl}}/v1/survey_responses?page=1&per_page=100
 Authorization: Bearer {{apiToken}}
 Content-Type: application/json
 
