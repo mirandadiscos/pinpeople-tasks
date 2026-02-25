@@ -210,21 +210,9 @@ paths:
                 - meta
         '401':
           description: unauthorized
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorObject"
         '422':
           description: invalid date format
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorObject"
         '500':
           description: internal server error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ErrorObject"
 servers:
 - url: http://127.0.0.1:3000

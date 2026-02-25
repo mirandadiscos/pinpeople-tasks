@@ -6,7 +6,6 @@
 - `Seguranca`: variaveis de ambiente, auth e CORS.
 - `Endpoint /v1/survey_responses`: contrato de filtros e paginacao.
 - `Swagger / API Docs`: como gerar e abrir documentacao.
-- `Tasks e Criterio de Conclusao`: qual task rodar e quando considerar concluida.
 - `Assumptions`: premissas do CSV e escolhas de modelagem.
 
 ## Rastreabilidade por Task (Challenge)
@@ -106,8 +105,18 @@ bundle exec rspec
 
 Policy de cobertura:
 
-- SimpleCov com cobertura minima global de `90%`.
-- Se a cobertura ficar abaixo de `90%`, o comando de testes falha.
+- `bundle exec rspec` usa `COVERAGE_MIN` (default: `90`).
+- `bundle exec rake rswag:specs:swaggerize` usa `SWAGGER_COVERAGE_MIN` (default: `70`).
+- No modo `swaggerize`, o SimpleCov ignora `/spec`, `/config` e `/db` para refletir melhor cobertura de app no dry-run.
+
+Exemplos:
+
+```bash
+COVERAGE_MIN=92 bundle exec rspec
+SWAGGER_COVERAGE_MIN=75 bundle exec rake rswag:specs:swaggerize
+```
+
+(Olhar .env de exemplo, tais informações podem ser adicionadas lá.)
 
 ## Seguranca Minima
 
@@ -116,6 +125,7 @@ Policy de cobertura:
 - `API_AUTH_TOKEN`: token Bearer para endpoints protegidos.
 - `CORS_ALLOWED_ORIGINS`: lista separada por virgula com origens permitidas.
   - Exemplo: `http://localhost:3000,https://app.example.com`
+- Politica de metodos CORS permitidos: `GET`, `OPTIONS`, `HEAD` (menor privilegio para API read-only).
 - `SWAGGER_SERVER_URL`: URL base usada na secao `servers` do OpenAPI.
   - Exemplo: `http://127.0.0.1:3000`
 
@@ -152,9 +162,9 @@ curl -H "Authorization: Bearer $API_AUTH_TOKEN" http://127.0.0.1:3000/v1/survey_
 Para manter a API em padrao Rails com menor acoplamento, a stack de `v1/survey_responses` foi separada por responsabilidade:
 
 - `Controller` (`V1::SurveyResponsesController`): apenas orquestra request/response HTTP.
-- `Service` (`SurveyResponses::Index::Service`): executa o caso de uso e monta `data` + `meta`.
+- `Use Case` (`SurveyResponses::Index::UseCase`, em `app/use_cases/survey_responses/index/use_case.rb`): executa o caso de uso e monta `data` + `meta`.
 - `Contract` (`SurveyResponses::Index::Contract`): valida filtros de `index` com `dry-validation`.
-- `Query Object` (`SurveyResponses::Index::Query`): concentra composicao de consulta no ActiveRecord.
+- `Query Object` (`SurveyResponses::Index::Query`, em `app/services/survey_responses/index/query.rb`): concentra composicao de consulta no ActiveRecord.
 - `Serializer` (`SurveyResponseSerializer`): define contrato de saida JSON do recurso.
 - `Authenticator` (`ApiTokenAuthenticator`): isola regra de autenticacao Bearer token.
 
@@ -164,6 +174,18 @@ Beneficios praticos dessa decisao:
 - melhora testabilidade unitária por camada;
 - facilita evoluir regras de filtro/serializacao sem quebrar endpoint;
 - evita duplicacao de regra HTTP e de dominio.
+
+### Mapeamento Central de Erros
+
+O tratamento de erro da API é centralizado no `ApplicationController` via `ErrorMapper` + `ApiError`:
+
+- `ActionController::ParameterMissing` -> `bad_request` (`400`)
+- `ActiveRecord::RecordNotFound` -> `not_found` (`404`)
+- `ActiveRecord::RecordInvalid` -> `unprocessable_content` (`422`)
+- `SurveyResponses::InvalidFiltersError` -> `unprocessable_content` (`422`)
+- fallback `StandardError` -> `internal_error` (`500`)
+
+Isso reduz duplicacao de `rescue_from` em controllers de recurso e mantém contrato de erro consistente.
 
 ### Observacao sobre status HTTP 422 no Rails 8/Rack 3
 
@@ -180,6 +202,13 @@ bundle exec rake rswag:specs:swaggerize
 ```
 
 Observacao: essa task usa RSpec no ambiente de teste; o banco de teste precisa estar disponivel.
+
+O OpenAPI usa componentes reutilizaveis para erros:
+
+- `components.schemas.ErrorObject`
+- `components.responses.UnauthorizedError`
+- `components.responses.UnprocessableContentError`
+- `components.responses.InternalServerError`
 
 ### Abrir docs
 
@@ -248,7 +277,8 @@ Testar manualmente via collections:
 - Header presente na primeira linha
 - Codificacao: UTF-8
 - Datas no formato `dd/mm/yyyy` (ex.: `20/01/2022`)
-- Colunas de comentario podem vir como `-` para ausencia de texto
+- Colunas de comentario podem vir como `-`, vazias (`""`) ou apenas com espacos para ausencia de texto (todas normalizadas para `nil`)
+- Nota: o README principal (`../README.md`) menciona o campo `celular`, mas essa coluna nao existe no header de `../data.csv`.
 
 ## Observacao Importante - Escala Likert
 
