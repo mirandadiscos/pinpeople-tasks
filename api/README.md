@@ -128,6 +128,8 @@ SWAGGER_COVERAGE_MIN=75 bundle exec rake rswag:specs:swaggerize
 - Politica de metodos CORS permitidos: `GET`, `OPTIONS`, `HEAD` (menor privilegio para API read-only).
 - `SWAGGER_SERVER_URL`: URL base usada na secao `servers` do OpenAPI.
   - Exemplo: `http://127.0.0.1:3000`
+- `COVERAGE_MIN`: cobertura minima (%) exigida ao rodar `bundle exec rspec` (default: `90`).
+- `SWAGGER_COVERAGE_MIN`: cobertura minima (%) exigida ao rodar `bundle exec rake rswag:specs:swaggerize` (default: `70`).
 
 Com `dotenv-rails`, o `.env` e carregado automaticamente em desenvolvimento/teste.
 
