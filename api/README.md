@@ -273,6 +273,7 @@ Testar via Swagger:
 Testar manualmente via collections:
 
 - arquivo: `../collections/api.http`
+- para executar o arquivo `.http`, instale um cliente HTTP na IDE (ex.: extensao `REST Client` no VS Code).
 
 ## Assumptions do `data.csv`
 
