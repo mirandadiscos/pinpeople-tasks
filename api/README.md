@@ -205,12 +205,11 @@ bundle exec rake rswag:specs:swaggerize
 
 Observacao: essa task usa RSpec no ambiente de teste; o banco de teste precisa estar disponivel.
 
-O OpenAPI usa componentes reutilizaveis para erros:
+O OpenAPI atual define schema reutilizavel para payload de erro em:
 
 - `components.schemas.ErrorObject`
-- `components.responses.UnauthorizedError`
-- `components.responses.UnprocessableContentError`
-- `components.responses.InternalServerError`
+
+No path `/v1/survey_responses`, as respostas `401`, `422` e `500` estao descritas por status no proprio endpoint.
 
 ### Abrir docs
 
